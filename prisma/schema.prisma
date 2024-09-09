@@ -1,24 +1,32 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
+// Define o gerador de cliente para usar o Prisma Client JS. O Prisma Client é uma biblioteca de acesso a banco de dados gerada automaticamente baseada no seu schema.
 
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+// Define a fonte de dados como SQLite, com a URL do banco de dados sendo obtida a partir de uma variável de ambiente chamada "DATABASE_URL".
 
 model User {
-  id Int @id @default(autoincrement())
-
+  id       Int    @id @default(autoincrement())
   email    String @unique
   password String
-
-  name String
+  name     String
+  task     Task[] @relation("UserTasks")
+  // Define o modelo "User" com os campos id (chave primária com incremento automático), email (único), password, name e uma relação com o modelo "Task".
+  // A relação é nomeada como "UserTasks", que associa um usuário a várias tarefas.
 }
 
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id], name: "UserTasks")
+  done        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // Define o modelo "Task" com os campos id (chave primária com incremento automático), title, description (opcional), ownerId (chave estrangeira referenciando "User"), done (status da tarefa com valor padrão como falso), createdAt (data de criação com valor padrão como o momento atual) e updatedAt (data de última atualização atualizada automaticamente).
+}
